@@ -13,11 +13,13 @@
             text-align: center;
         }
         .scene {
-            background: url('A_2D_digital_illustration_depicts_a_warehouse_scen.png') no-repeat center/cover;
+            background-size: cover;
+            background-position: center;
             width: 100vw;
-            height: 75vh;
+            height: 70vh;
             position: relative;
             overflow: hidden;
+            transition: background-image 0.5s ease-in-out;
         }
         .reaction {
             position: absolute;
@@ -39,83 +41,145 @@
             box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         }
         button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin: 10px;
+            padding: 10px 18px;
+            font-size: 16px;
+            margin: 6px;
             border: none;
             border-radius: 6px;
-            background-color: #28a745;
+            background-color: #007bff;
             color: white;
             cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
         }
         .stats {
             margin-top: 10px;
-            font-size: 18px;
+            font-size: 16px;
+        }
+        .task-animation {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .anger-bar {
+            margin: 10px auto;
+            width: 80%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .anger-fill {
+            height: 100%;
+            background: linear-gradient(to right, red, orange);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .scene-buttons {
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="scene" id="scene">
+    <div class="scene" id="scene" style="background-image: url('A_2D_digital_illustration_depicts_a_warehouse_scen.png');">
         <div class="reaction" id="reaction"></div>
     </div>
-    <div class="controls">
+
+    <div class="controls" id="controls">
+        <div class="scene-buttons">
+            <button onclick="changeLocation('warehouse')">Склад</button>
+            <button onclick="changeLocation('office')">Офис</button>
+            <button onclick="changeLocation('security')">Комната охраны</button>
+        </div>
+        <div class="anger-bar">
+            <div class="anger-fill" id="angerFill"></div>
+        </div>
         <button onclick="performAction('trash')">Подбросить мусор</button>
         <button onclick="performAction('steal')">Украсть материалы</button>
-        <button onclick="performAction('noise')">Громко хлопнуть дверью</button>
+        <button onclick="performAction('noise')">Хлопнуть дверью</button>
+        <button onclick="performAction('alarm')">Включить сирену</button>
+        <button onclick="performAction('coffee')">Пролить кофе</button>
         <div class="stats">
             Очки: <span id="score">0</span> |
-            Уровень наглости: <span id="level">1</span>
+            Уровень: <span id="level">1</span> |
+            Гнев Артёма: <span id="anger">0%</span>
         </div>
     </div>
-
-    <audio id="success-sound" src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..."></audio>
-    <audio id="fail-sound" src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..."></audio>
 
     <script>
         let score = parseInt(localStorage.getItem('score')) || 0;
         let level = parseInt(localStorage.getItem('level')) || 1;
+        let anger = parseInt(localStorage.getItem('anger')) || 0;
+        let currentLocation = localStorage.getItem('location') || 'warehouse';
 
-        const scene = document.getElementById('scene');
+        const locations = {
+            warehouse: 'A_2D_digital_illustration_depicts_a_warehouse_scen.png',
+            office: 'https://dummyimage.com/800x600/cccccc/000000&text=Офис',
+            security: 'https://dummyimage.com/800x600/999999/ffffff&text=Охрана'
+        };
+
         const reaction = document.getElementById('reaction');
-        const successSound = document.getElementById('success-sound');
-        const failSound = document.getElementById('fail-sound');
+        const controls = document.getElementById('controls');
+        const angerFill = document.getElementById('angerFill');
+        const scene = document.getElementById('scene');
 
         function updateStats() {
             document.getElementById('score').textContent = score;
             document.getElementById('level').textContent = level;
+            document.getElementById('anger').textContent = anger + "%";
+            angerFill.style.width = anger + "%";
             localStorage.setItem('score', score);
             localStorage.setItem('level', level);
+            localStorage.setItem('anger', anger);
         }
 
         function performAction(action) {
             const actions = {
                 trash: {success: "Ты подбросил мусор!", fail: "Артём: Опять мусор?!"},
                 steal: {success: "Ты утащил материалы!", fail: "Артём: Ты куда с этим собрался?!"},
-                noise: {success: "Ты громко хлопнул дверью!", fail: "Артём: Не хлопай дверью!"}
+                noise: {success: "Ты хлопнул дверью!", fail: "Артём: Не хлопай дверью!"},
+                alarm: {success: "Ты включил сирену!", fail: "Артём: Кто включил тревогу?!"},
+                coffee: {success: "Ты пролил кофе!", fail: "Артём: Кто тут насвинячил?!"}
             };
+
+            controls.classList.add("task-animation");
+            setTimeout(() => controls.classList.remove("task-animation"), 500);
 
             const chance = Math.random();
             if (chance < 0.25) {
-                // Попался
                 const penalty = Math.floor(Math.random() * 5) + 1;
                 score = Math.max(0, score - penalty);
-                failSound.play();
+                anger = Math.min(100, anger + 15);
                 reaction.textContent = actions[action].fail + " -" + penalty + " очков!";
             } else {
-                // Успех
                 const gain = Math.floor(Math.random() * 10) + 5;
                 score += gain;
-                successSound.play();
+                anger = Math.min(100, anger + 5);
                 reaction.textContent = actions[action].success + " +" + gain + " очков!";
             }
 
             level = Math.floor(score / 50) + 1;
             reaction.style.animation = 'none';
-            reaction.offsetHeight; // Force reflow
+            reaction.offsetHeight;
             reaction.style.animation = null;
             updateStats();
         }
 
+        function changeLocation(loc) {
+            currentLocation = loc;
+            scene.style.backgroundImage = `url('${locations[loc]}')`;
+            localStorage.setItem('location', loc);
+        }
+
+        // Инициализация
+        changeLocation(currentLocation);
         updateStats();
     </script>
 </body>
