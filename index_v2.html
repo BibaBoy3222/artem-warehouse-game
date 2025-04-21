@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Как достать Артёма</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .scene {
+            background: url('A_2D_digital_illustration_depicts_a_warehouse_scen.png') no-repeat center/contain;
+            width: 100%;
+            max-width: 1000px;
+            height: 70vh;
+            margin-top: 10px;
+            position: relative;
+            border: 2px solid #ccc;
+        }
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .reaction {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+
+<header>🎮 Как достать Артёма</header>
+
+<div class="game-container">
+    <div class="scene"></div>
+
+    <div class="actions">
+        <button onclick="throwTrash()">Подбросить мусор</button>
+        <button onclick="dropBox()">Уронить коробку</button>
+        <button onclick="takeMaterial()">Украсть материал</button>
+        <button onclick="makeNoise()">Сделать громкий звук</button>
+    </div>
+
+    <div class="reaction" id="reaction"></div>
+</div>
+
+<script>
+    const reaction = document.getElementById('reaction');
+
+    function randomReaction(responses) {
+        const index = Math.floor(Math.random() * responses.length);
+        reaction.textContent = responses[index];
+    }
+
+    function throwTrash() {
+        randomReaction([
+            "Артём: Кто насорил? Я только убрался!",
+            "Артём: Мусор? Опять ты?!",
+            "Артём: Это не смешно!"
+        ]);
+    }
+
+    function dropBox() {
+        randomReaction([
+            "Артём: Ты уронил коробку с инструментами!",
+            "Артём: Склад не место для акробатики!",
+            "Артём: Я это начальству покажу..."
+        ]);
+    }
+
+    function takeMaterial() {
+        randomReaction([
+            "Артём: А кто взял рулон? Я не подписывал!",
+            "Артём: Опять тянете без накладной...",
+            "Артём: Я всё вижу!"
+        ]);
+    }
+
+    function makeNoise() {
+        randomReaction([
+            "Артём: Тише! Я инвентаризацию делаю!",
+            "Артём: Это что сейчас было?",
+            "Артём: Спокойствие, только спокойствие..."
+        ]);
+    }
+</script>
+
+</body>
+</html>
