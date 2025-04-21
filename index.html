@@ -6,57 +6,117 @@
     <title>Как достать Артёма</title>
     <style>
         body {
-            background: #eee;
-            font-family: sans-serif;
-            text-align: center;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            text-align: center;
         }
         .scene {
-            background: url('A_2D_digital_illustration_depicts_a_warehouse_scen.png') no-repeat center/contain;
+            background: url('A_2D_digital_illustration_depicts_a_warehouse_scen.png') no-repeat center/cover;
             width: 100vw;
-            height: 80vh;
+            height: 75vh;
             position: relative;
-        }
-        .button {
-            margin-top: 20px;
-        }
-        button {
-            font-size: 20px;
-            padding: 12px 24px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            overflow: hidden;
         }
         .reaction {
-            margin-top: 10px;
-            font-size: 18px;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
             font-weight: bold;
             color: #d9534f;
+            animation: fadein 0.5s ease-out;
+        }
+        @keyframes fadein {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        .controls {
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            border: none;
+            border-radius: 6px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        .stats {
+            margin-top: 10px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <div class="scene"></div>
-    <div class="button">
-        <button onclick="throwTrash()">Подбросить мусор</button>
+    <div class="scene" id="scene">
         <div class="reaction" id="reaction"></div>
     </div>
+    <div class="controls">
+        <button onclick="performAction('trash')">Подбросить мусор</button>
+        <button onclick="performAction('steal')">Украсть материалы</button>
+        <button onclick="performAction('noise')">Громко хлопнуть дверью</button>
+        <div class="stats">
+            Очки: <span id="score">0</span> |
+            Уровень наглости: <span id="level">1</span>
+        </div>
+    </div>
+
+    <audio id="success-sound" src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..."></audio>
+    <audio id="fail-sound" src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA..."></audio>
 
     <script>
-        function throwTrash() {
-            const reaction = document.getElementById('reaction');
-            const responses = [
-                "Артём: Кто опять насорил?!",
-                "Артём: Я же просил не мусорить!",
-                "Артём: Что за бардак на складе?!",
-                "Артём: Опять ты?!"
-            ];
-            const random = Math.floor(Math.random() * responses.length);
-            reaction.textContent = responses[random];
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        let level = parseInt(localStorage.getItem('level')) || 1;
+
+        const scene = document.getElementById('scene');
+        const reaction = document.getElementById('reaction');
+        const successSound = document.getElementById('success-sound');
+        const failSound = document.getElementById('fail-sound');
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            localStorage.setItem('score', score);
+            localStorage.setItem('level', level);
         }
+
+        function performAction(action) {
+            const actions = {
+                trash: {success: "Ты подбросил мусор!", fail: "Артём: Опять мусор?!"},
+                steal: {success: "Ты утащил материалы!", fail: "Артём: Ты куда с этим собрался?!"},
+                noise: {success: "Ты громко хлопнул дверью!", fail: "Артём: Не хлопай дверью!"}
+            };
+
+            const chance = Math.random();
+            if (chance < 0.25) {
+                // Попался
+                const penalty = Math.floor(Math.random() * 5) + 1;
+                score = Math.max(0, score - penalty);
+                failSound.play();
+                reaction.textContent = actions[action].fail + " -" + penalty + " очков!";
+            } else {
+                // Успех
+                const gain = Math.floor(Math.random() * 10) + 5;
+                score += gain;
+                successSound.play();
+                reaction.textContent = actions[action].success + " +" + gain + " очков!";
+            }
+
+            level = Math.floor(score / 50) + 1;
+            reaction.style.animation = 'none';
+            reaction.offsetHeight; // Force reflow
+            reaction.style.animation = null;
+            updateStats();
+        }
+
+        updateStats();
     </script>
 </body>
 </html>
