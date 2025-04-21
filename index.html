@@ -5,20 +5,20 @@
     <meta charset="UTF-8">
     <title>Как достать Артёма</title>
     <style>
-        body {
-            background: #f0f0f0;
-            font-family: Arial, sans-serif;
+        html, body {
             margin: 0;
             padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
             text-align: center;
         }
         .scene {
-            background-size: cover;
-            background-position: center;
             width: 100vw;
             height: 70vh;
             position: relative;
-            overflow: hidden;
+            background-size: cover;
+            background-position: center;
             transition: background-image 0.5s ease-in-out;
         }
         .reaction {
@@ -34,6 +34,14 @@
         @keyframes fadein {
             from {opacity: 0;}
             to {opacity: 1;}
+        }
+        .anger-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         .controls {
             padding: 20px;
@@ -88,7 +96,7 @@
     </style>
 </head>
 <body>
-    <div class="scene" id="scene" style="background-image: url('A_2D_digital_illustration_depicts_a_warehouse_scen.png');">
+    <div class="scene" id="scene">
         <div class="reaction" id="reaction"></div>
     </div>
 
@@ -96,7 +104,7 @@
         <div class="scene-buttons">
             <button onclick="changeLocation('warehouse')">Склад</button>
             <button onclick="changeLocation('office')">Офис</button>
-            <button onclick="changeLocation('security')">Комната охраны</button>
+            <button onclick="changeLocation('security')">Охрана</button>
         </div>
         <div class="anger-bar">
             <div class="anger-fill" id="angerFill"></div>
@@ -157,6 +165,7 @@
                 const penalty = Math.floor(Math.random() * 5) + 1;
                 score = Math.max(0, score - penalty);
                 anger = Math.min(100, anger + 15);
+                scene.classList.add("anger-animation");
                 reaction.textContent = actions[action].fail + " -" + penalty + " очков!";
             } else {
                 const gain = Math.floor(Math.random() * 10) + 5;
@@ -169,6 +178,7 @@
             reaction.style.animation = 'none';
             reaction.offsetHeight;
             reaction.style.animation = null;
+            setTimeout(() => scene.classList.remove("anger-animation"), 500);
             updateStats();
         }
 
